@@ -3,8 +3,11 @@ from models.BaseNN import *
 
 class CNN(BaseNN):
 
+
     def network(self):
         tf.set_random_seed(1)
+
+        self.X_tf = tf.reshape(self.X_tf, [-1, self.data_loader.config["img_h"], self.data_loader.config["img_w"], self.data_loader.config["img_chls"]])
 
         # parameters
         W1 = tf.get_variable('W1', shape=[3, 3, 1, 32], initializer=tf.contrib.layers.xavier_initializer(seed=0))
@@ -38,7 +41,7 @@ class CNN(BaseNN):
         Z4 = tf.layers.batch_normalization(Z4, name='layer_4_norm', training=self.training_flag, momentum=0.9)
         Z4 = tf.nn.dropout(Z4, 0.2)
         # softmax
-        Z4 = tf.contrib.layers.fully_connected(Z4, self.config["num_cls"], activation_fn=None)
+        Z4 = tf.contrib.layers.fully_connected(Z4, self.data_loader.config["num_cls"], activation_fn=None)
 
         return Z4
 

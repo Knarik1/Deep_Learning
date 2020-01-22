@@ -2,6 +2,7 @@ import tensorflow as tf
 from models.DNN import *
 from models.CNN import *
 from models.VGG import *
+from models.RNN import *
 
 # Datasets
 tf.app.flags.DEFINE_string('train_images_dir', '', 'Training images data directory.')
@@ -32,7 +33,7 @@ tf.app.flags.DEFINE_integer('summary_step', 20, 'Number of steps we cycle throug
 
 tf.app.flags.DEFINE_string('model_name', 'softmax_classifier', 'name of model')
 
-tf.app.flags.DEFINE_boolean('flatten', True, 'whether to flatten data')
+tf.app.flags.DEFINE_string('model', 'CNN', 'DNN, CNN or RNN')
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -42,9 +43,9 @@ def main(argv=None):
         train_images_dir='data/train/',
         val_images_dir='data/val/',
         test_images_dir='data/test/',
-        num_epochs=20,
-        train_batch_size=32,
-        val_batch_size=2500,
+        num_epochs=40,
+        train_batch_size=1000,
+        val_batch_size=1000,
         test_batch_size=10000,
         height_of_image=28,
         width_of_image=28,
@@ -52,16 +53,16 @@ def main(argv=None):
         num_classes=10,
         learning_rate=0.001,
         base_dir='results',
-        max_to_keep=4,
+        max_to_keep=2,
         model_name="CNN",
-        flatten=False
+        model='CNN'
     )
 
     model.create_network()
     model.initialize_network()
 
     if True:
-        model.train_model(1, 2, 3, 1)
+        model.train_model(1, 1, 1, 4)
     else:
         model.test_model()
 

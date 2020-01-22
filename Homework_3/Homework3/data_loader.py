@@ -13,29 +13,26 @@ filename_y_test = "t10k-labels-idx1-ubyte.gz"
 
 class DataLoader:
     def __init__(self, train_images_dir, val_images_dir, test_images_dir, train_batch_size, val_batch_size,
-                 test_batch_size, height_of_image, width_of_image, num_channels, num_classes, flatten):
+                 test_batch_size, height_of_image, width_of_image, num_channels, num_classes, model):
 
-        # train/val/test data sizes
-        self.m_train = 55000
-        self.m_val = 5000
-        self.m_test = 10000
-
-        self.flatten = flatten
-
-        # setting height/ width/ number of channels/ number of classes
-        self.height_of_image = height_of_image
-        self.width_of_image = width_of_image
-        self.num_channels = num_channels
-        self.num_classes = num_classes
+        self.config = {
+            "m_train": 55000,
+            "m_val": 5000,
+            "m_test": 10000,
+            "train_batch_size": train_batch_size,
+            "val_batch_size": val_batch_size,
+            "test_batch_size": test_batch_size,
+            "img_h": height_of_image,
+            "img_w": width_of_image,
+            "img_chls": num_channels,
+            "num_cls": num_classes,
+            "model": model
+        }
 
         # getting images paths
         self.train_paths = glob.glob(os.path.join(train_images_dir, "**/*.png"), recursive=True)
         self.val_paths = glob.glob(os.path.join(val_images_dir, "**/*.png"), recursive=True)
         self.test_paths = glob.glob(os.path.join(test_images_dir, "**/*.png"), recursive=True)
-
-        self.train_batch_size = train_batch_size
-        self.val_batch_size = val_batch_size
-        self.test_batch_size = test_batch_size
 
         # download and load images.
         x_train = self.load_images(filename_x_train, train_images_dir)
@@ -44,15 +41,15 @@ class DataLoader:
         self.y_test_cls = self.load_cls(filename_y_test, test_images_dir)
 
         # split into train/validation sets
-        self.x_train = x_train[0:self.m_train]
-        self.x_val = x_train[self.m_train:]
-        self.y_train_cls = y_train_cls[0:self.m_train]
-        self.y_val_cls = y_train_cls[self.m_train:]
+        self.x_train = x_train[0:self.config["m_train"]]
+        self.x_val = x_train[self.config["m_train"]:]
+        self.y_train_cls = y_train_cls[0:self.config["m_train"]]
+        self.y_val_cls = y_train_cls[self.config["m_train"]:]
 
         # one-hot-encode labels
-        self.y_train = one_hot_encoded(self.y_train_cls, self.num_classes)
-        self.y_val = one_hot_encoded(self.y_val_cls, self.num_classes)
-        self.y_test = one_hot_encoded(self.y_test_cls, self.num_classes)
+        self.y_train = one_hot_encoded(self.y_train_cls, self.config["num_cls"])
+        self.y_val = one_hot_encoded(self.y_val_cls, self.config["num_cls"])
+        self.y_test = one_hot_encoded(self.y_test_cls, self.config["num_cls"])
 
         # save in class folders
         save_in_folders(path=train_images_dir, images=self.x_train, labels=self.y_train_cls)
@@ -65,7 +62,7 @@ class DataLoader:
         data = self.load_data(filename, data_dir, 16)
 
         # getting data with shape (number_of_images, 28, 28)
-        images = data.reshape(-1, self.height_of_image, self.width_of_image, self.num_channels)
+        images = data.reshape(-1, self.config["img_h"], self.config["img_w"], self.config["img_chls"])
 
         return images
 
@@ -86,7 +83,7 @@ class DataLoader:
     def load_image(self, path):
         image = imread(path)
         cls = int(path.split('/')[-2])
-        label = one_hot_encoded(cls, self.num_classes)
+        label = one_hot_encoded(cls, self.config["num_cls"])
 
         return image, label
 
@@ -108,10 +105,12 @@ class DataLoader:
             im = imread(path)
 
             #reshape image
-            if self.flatten:
-                im = im.reshape(self.height_of_image * self.width_of_image * self.num_channels)
+            if self.config["model"] == 'DNN':
+                im = im.reshape(self.config["img_h"] * self.config["img_w"] * self.config["img_chls"])
+            elif self.config["model"] == 'RNN':
+                im = im.reshape(self.config["img_h"], self.config["img_w"])
             else:
-                im = im.reshape(self.height_of_image, self.width_of_image, self.num_channels)
+                im = im.reshape(self.config["img_h"], self.config["img_w"], self.config["img_chls"])
 
             x_batch.append(im)
 
@@ -124,15 +123,15 @@ class DataLoader:
         y_cls_batch = np.array(y_cls_batch)
 
         # getting one-hot-encoded labels
-        y_batch = one_hot_encoded(y_cls_batch, self.num_classes)
+        y_batch = one_hot_encoded(y_cls_batch, self.config["num_cls"])
 
         return x_batch, y_batch, y_cls_batch
 
     def train_data_loader(self, index, perm=None):
-        return self.batch_data_loader(self.train_batch_size, self.train_paths, index, perm=perm)
+        return self.batch_data_loader(self.config["train_batch_size"], self.train_paths, index, perm=perm)
 
     def val_data_loader(self, index, perm=None):
-        return self.batch_data_loader(self.val_batch_size, self.val_paths, index, perm=perm)
+        return self.batch_data_loader(self.config["val_batch_size"], self.val_paths, index, perm=perm)
 
     def test_data_loader(self, index, perm=None):
-        return self.batch_data_loader(self.test_batch_size, self.test_paths, index)
+        return self.batch_data_loader(self.config["test_batch_size"], self.test_paths, index, perm=perm)

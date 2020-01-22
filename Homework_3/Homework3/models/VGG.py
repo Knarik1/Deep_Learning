@@ -6,6 +6,8 @@ class VGG(BaseNN):
     def network(self):
         tf.set_random_seed(1)
 
+        self.X_tf = tf.reshape(self.X_tf, [-1, self.data_loader.config["img_h"], self.data_loader.config["img_w"], self.data_loader.config["img_chls"]])
+
         # parameters
         W1 = tf.get_variable('W1', shape=[3, 3, 1, 64], initializer=tf.contrib.layers.xavier_initializer(seed=0))
         W2 = tf.get_variable('W2', shape=[3, 3, 64, 64], initializer=tf.contrib.layers.xavier_initializer(seed=0))
@@ -65,7 +67,7 @@ class VGG(BaseNN):
         Z8 = tf.contrib.layers.fully_connected(Z7, 1024, activation_fn=tf.nn.relu)
         Z8 = tf.nn.dropout(Z8, 0.4)
         # softmax
-        Z8 = tf.contrib.layers.fully_connected(Z8, self.config["num_cls"], activation_fn=None)
+        Z8 = tf.contrib.layers.fully_connected(Z8, self.data_loader.config["num_cls"], activation_fn=None)
 
         return Z8
 

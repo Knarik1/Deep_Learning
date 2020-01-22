@@ -39,14 +39,14 @@ FLAGS = tf.app.flags.FLAGS
 
 
 def main(argv=None):
-    model = DNN(
+    model = VGG(
         train_images_dir='data/train/',
         val_images_dir='data/val/',
         test_images_dir='data/test/',
         num_epochs=40,
         train_batch_size=1000,
         val_batch_size=1000,
-        test_batch_size=10000,
+        test_batch_size=1000,
         height_of_image=28,
         width_of_image=28,
         num_channels=1,
@@ -54,15 +54,15 @@ def main(argv=None):
         learning_rate=0.001,
         base_dir='results',
         max_to_keep=2,
-        model_name="DNN",
-        model='DNN'
+        model_name="VGG",
+        model='VGG'
     )
 
     model.create_network()
     model.initialize_network()
 
-    if False:
-        model.train_model(1, 1, 1, 4)
+    if True:
+        model.train_model(1, 1, 1, 2)
     else:
         model.test_model()
 

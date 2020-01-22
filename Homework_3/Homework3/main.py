@@ -1,7 +1,5 @@
 import tensorflow as tf
 from models.DNN import *
-from models.CNN import *
-from models.VGG import *
 
 # Datasets
 tf.app.flags.DEFINE_string('train_images_dir', '', 'Training images data directory.')
@@ -26,15 +24,16 @@ tf.app.flags.DEFINE_integer('validation_step', 60, 'Number of steps we cycle thr
 
 tf.app.flags.DEFINE_string('base_dir', './results', 'Directory in which results will be stored.')
 tf.app.flags.DEFINE_integer('checkpoint_step', 300, 'Number of steps we cycle through before saving checkpoint.')
-tf.app.flags.DEFINE_integer('max_to_keep', 2, 'Number of checkpoint files to keep.')
+tf.app.flags.DEFINE_integer('max_to_keep', 5, 'Number of checkpoint files to keep.')
 
 tf.app.flags.DEFINE_integer('summary_step', 20, 'Number of steps we cycle through before saving summary.')
 
 tf.app.flags.DEFINE_string('model_name', 'softmax_classifier', 'name of model')
 
-tf.app.flags.DEFINE_boolean('flatten', False, 'whether to flatten data')
+tf.app.flags.DEFINE_string('model', 'CNN', 'DNN, CNN or RNN')
 
 FLAGS = tf.app.flags.FLAGS
+
 
 def main(argv=None):
     model = DNN(
@@ -53,7 +52,7 @@ def main(argv=None):
         base_dir=FLAGS.base_dir,
         max_to_keep=FLAGS.max_to_keep,
         model_name=FLAGS.model_name,
-        flatten=FLAGS.flatten,
+        model=FLAGS.model
     )
 
     model.create_network()
